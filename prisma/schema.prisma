@@ -1,0 +1,305 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  user
+  company
+  admin
+}
+
+enum GigStatus {
+  draft
+  open
+  paused
+  completed
+  cancelled
+}
+
+enum ApplicationStatus {
+  pending
+  accepted
+  denied
+  withdrawn
+}
+
+enum SubmissionStatus {
+  pending_review
+  accepted
+  rejected
+}
+
+enum LedgerEntryType {
+  deposit
+  escrow_hold
+  escrow_release
+  payout
+  refund
+  platform_fee
+}
+
+enum DeviceType {
+  apple_watch
+  generic_android
+  generic_ios
+}
+
+enum NotificationType {
+  application_accepted
+  application_denied
+  submission_accepted
+  submission_rejected
+  payout_sent
+  gig_paused
+  gig_cancelled
+  low_balance_warning
+}
+
+enum PayoutStatus {
+  pending
+  in_transit
+  paid
+  failed
+  cancelled
+}
+
+model User {
+  id        String   @id @default(uuid()) @db.Uuid
+  email     String   @unique
+  role      UserRole @default(user)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  userProfile    UserProfile?
+  companyProfile CompanyProfile?
+  applications   Application[]
+  ledgerEntries  LedgerEntry[]   @relation("UserLedger")
+  payoutRequests PayoutRequest[]
+  notifications  Notification[]
+
+  @@map("users")
+}
+
+model UserProfile {
+  userId                   String   @id @db.Uuid @map("user_id")
+  displayName              String?  @map("display_name")
+  bio                      String?
+  avatarUrl                String?  @map("avatar_url")
+  phone                    String?
+  age                      Int?
+  stateCountry             String?  @map("state_country")
+  stripeAccountId          String?  @map("stripe_account_id")
+  stripeOnboardingComplete Boolean  @default(false) @map("stripe_onboarding_complete")
+  creditsBalanceCents      Int      @default(0) @map("credits_balance_cents")
+  createdAt                DateTime @default(now()) @map("created_at")
+  updatedAt                DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_profiles")
+}
+
+model CompanyProfile {
+  userId           String   @id @db.Uuid @map("user_id")
+  companyName      String   @map("company_name")
+  logoUrl          String?  @map("logo_url")
+  websiteUrl       String?  @map("website_url")
+  description      String?
+  stripeCustomerId String?  @map("stripe_customer_id")
+  balanceCents     Int      @default(0) @map("balance_cents")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gigs          Gig[]
+  ledgerEntries LedgerEntry[]   @relation("CompanyLedger")
+  escrowHolds   GigEscrowHold[]
+
+  @@map("company_profiles")
+}
+
+model Gig {
+  id                  String    @id @default(uuid()) @db.Uuid
+  companyId           String    @db.Uuid @map("company_id")
+  title               String
+  description         String
+  activityType        String    @map("activity_type")
+  status              GigStatus @default(draft)
+  totalSlots          Int       @map("total_slots")
+  filledSlots         Int       @default(0) @map("filled_slots")
+  applicationDeadline DateTime? @map("application_deadline") @db.Timestamptz
+  dataDeadline        DateTime? @map("data_deadline") @db.Timestamptz
+  publishedAt         DateTime? @map("published_at") @db.Timestamptz
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+
+  company            CompanyProfile         @relation(fields: [companyId], references: [userId], onDelete: Cascade)
+  labels             GigLabel[]
+  deviceRequirements GigDeviceRequirement[]
+  applications       Application[]
+  escrowHold         GigEscrowHold?
+
+  @@map("gigs")
+}
+
+model GigLabel {
+  id                String   @id @default(uuid()) @db.Uuid
+  gigId             String   @db.Uuid @map("gig_id")
+  labelName         String   @map("label_name")
+  description       String?
+  durationSeconds   Int      @map("duration_seconds")
+  rateCents         Int      @map("rate_cents")
+  quantityNeeded    Int      @map("quantity_needed")
+  quantityFulfilled Int      @default(0) @map("quantity_fulfilled")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  gig         Gig          @relation(fields: [gigId], references: [id], onDelete: Cascade)
+  submissions Submission[]
+
+  @@unique([gigId, labelName])
+  @@map("gig_labels")
+}
+
+model GigDeviceRequirement {
+  id         String     @id @default(uuid()) @db.Uuid
+  gigId      String     @db.Uuid @map("gig_id")
+  deviceType DeviceType @map("device_type")
+
+  gig Gig @relation(fields: [gigId], references: [id], onDelete: Cascade)
+
+  @@unique([gigId, deviceType])
+  @@map("gig_device_requirements")
+}
+
+model Application {
+  id              String            @id @default(uuid()) @db.Uuid
+  gigId           String            @db.Uuid @map("gig_id")
+  userId          String            @db.Uuid @map("user_id")
+  status          ApplicationStatus @default(pending)
+  assignmentCode  String?           @unique @map("assignment_code")
+  deviceType      DeviceType        @map("device_type")
+  noteFromUser    String?           @map("note_from_user")
+  noteFromCompany String?           @map("note_from_company")
+  appliedAt       DateTime          @default(now()) @map("applied_at") @db.Timestamptz
+  reviewedAt      DateTime?         @map("reviewed_at") @db.Timestamptz
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+
+  gig         Gig          @relation(fields: [gigId], references: [id], onDelete: Cascade)
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  submissions Submission[]
+
+  @@unique([gigId, userId])
+  @@map("applications")
+}
+
+model Submission {
+  id                 String           @id @default(uuid()) @db.Uuid
+  applicationId      String           @db.Uuid @map("application_id")
+  gigLabelId         String           @db.Uuid @map("gig_label_id")
+  assignmentCode     String           @map("assignment_code")
+  status             SubmissionStatus @default(pending_review)
+  storagePath        String?          @map("storage_path")
+  fileSizeBytes      BigInt?          @map("file_size_bytes")
+  durationSeconds    Int?             @map("duration_seconds")
+  deviceType         DeviceType       @map("device_type")
+  deviceMetadata     Json?            @map("device_metadata")
+  verificationResult Json?            @map("verification_result")
+  verifiedAt         DateTime?        @map("verified_at") @db.Timestamptz
+  submittedAt        DateTime         @default(now()) @map("submitted_at") @db.Timestamptz
+  createdAt          DateTime         @default(now()) @map("created_at")
+  updatedAt          DateTime         @updatedAt @map("updated_at")
+
+  application   Application   @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  gigLabel      GigLabel      @relation(fields: [gigLabelId], references: [id], onDelete: Cascade)
+  ledgerEntries LedgerEntry[]
+
+  @@map("submissions")
+}
+
+model LedgerEntry {
+  id                    String          @id @default(uuid()) @db.Uuid
+  type                  LedgerEntryType
+  amountCents           Int             @map("amount_cents")
+  companyId             String?         @db.Uuid @map("company_id")
+  userId                String?         @db.Uuid @map("user_id")
+  submissionId          String?         @db.Uuid @map("submission_id")
+  stripePaymentIntentId String?         @map("stripe_payment_intent_id")
+  stripeTransferId      String?         @map("stripe_transfer_id")
+  description           String?
+  createdAt             DateTime        @default(now()) @map("created_at")
+
+  company    CompanyProfile? @relation("CompanyLedger", fields: [companyId], references: [userId], onDelete: SetNull)
+  user       User?           @relation("UserLedger", fields: [userId], references: [id], onDelete: SetNull)
+  submission Submission?     @relation(fields: [submissionId], references: [id], onDelete: SetNull)
+
+  @@map("ledger_entries")
+}
+
+model GigEscrowHold {
+  id             String   @id @default(uuid()) @db.Uuid
+  gigId          String   @unique @db.Uuid @map("gig_id")
+  companyId      String   @db.Uuid @map("company_id")
+  totalHeldCents Int      @map("total_held_cents")
+  releasedCents  Int      @default(0) @map("released_cents")
+  refundedCents  Int      @default(0) @map("refunded_cents")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  gig     Gig            @relation(fields: [gigId], references: [id], onDelete: Cascade)
+  company CompanyProfile @relation(fields: [companyId], references: [userId], onDelete: Cascade)
+
+  @@map("gig_escrow_holds")
+}
+
+model PayoutRequest {
+  id               String       @id @default(uuid()) @db.Uuid
+  userId           String       @db.Uuid @map("user_id")
+  amountCents      Int          @map("amount_cents")
+  status           PayoutStatus @default(pending)
+  stripeTransferId String?      @unique @map("stripe_transfer_id")
+  stripePayoutId   String?      @map("stripe_payout_id")
+  failureReason    String?      @map("failure_reason")
+  requestedAt      DateTime     @default(now()) @map("requested_at") @db.Timestamptz
+  completedAt      DateTime?    @map("completed_at") @db.Timestamptz
+  createdAt        DateTime     @default(now()) @map("created_at")
+  updatedAt        DateTime     @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("payout_requests")
+}
+
+model Notification {
+  id        String           @id @default(uuid()) @db.Uuid
+  userId    String           @db.Uuid @map("user_id")
+  type      NotificationType
+  title     String
+  body      String
+  isRead    Boolean          @default(false) @map("is_read")
+  metadata  Json?
+  createdAt DateTime         @default(now()) @map("created_at")
+  updatedAt DateTime         @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+model StripeWebhookEvent {
+  id            String    @id @default(uuid()) @db.Uuid
+  stripeEventId String    @unique @map("stripe_event_id")
+  type          String
+  processed     Boolean   @default(false)
+  error         String?
+  rawPayload    Json      @map("raw_payload")
+  processedAt   DateTime? @map("processed_at") @db.Timestamptz
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  @@map("stripe_webhook_events")
+}
