@@ -16,10 +16,13 @@ export default async function CompanyGigsPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="border-b bg-white px-6 py-4">
-        <div className="mx-auto flex max-w-6xl items-center gap-4">
-          <Link href="/company/dashboard" className="text-gray-500 hover:text-gray-900">← Dashboard</Link>
-          <h1 className="font-semibold text-gray-900">My Gigs</h1>
-          <div className="ml-auto">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <Link href="/company/dashboard" className="text-gray-500 hover:text-gray-900">← Dashboard</Link>
+            <h1 className="font-semibold text-gray-900">My Gigs</h1>
+          </div>
+          <div className="flex items-center gap-3">
+            <Link href="/company/dashboard" className="text-sm text-gray-600 hover:text-gray-900">Dashboard</Link>
             <Link
               href="/company/gigs/new"
               className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700"

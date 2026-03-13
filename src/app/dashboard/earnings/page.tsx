@@ -26,9 +26,12 @@ export default async function EarningsPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="border-b bg-white px-6 py-4">
-        <div className="mx-auto flex max-w-6xl items-center gap-4">
-          <Link href="/dashboard" className="text-gray-500 hover:text-gray-900">← Dashboard</Link>
-          <h1 className="font-semibold text-gray-900">Earnings</h1>
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <Link href="/dashboard" className="text-gray-500 hover:text-gray-900">← Dashboard</Link>
+            <h1 className="font-semibold text-gray-900">Earnings</h1>
+          </div>
+          <Link href="/dashboard" className="text-sm text-gray-600 hover:text-gray-900">Dashboard</Link>
         </div>
       </nav>
 
