@@ -10,6 +10,8 @@ enum UserRole {
   user
   company
   admin
+
+  @@map("user_role")
 }
 
 enum GigStatus {
@@ -18,6 +20,8 @@ enum GigStatus {
   paused
   completed
   cancelled
+
+  @@map("gig_status")
 }
 
 enum ApplicationStatus {
@@ -25,12 +29,16 @@ enum ApplicationStatus {
   accepted
   denied
   withdrawn
+
+  @@map("application_status")
 }
 
 enum SubmissionStatus {
   pending_review
   accepted
   rejected
+
+  @@map("submission_status")
 }
 
 enum LedgerEntryType {
@@ -40,12 +48,16 @@ enum LedgerEntryType {
   payout
   refund
   platform_fee
+
+  @@map("ledger_entry_type")
 }
 
 enum DeviceType {
   apple_watch
   generic_android
   generic_ios
+
+  @@map("device_type")
 }
 
 enum NotificationType {
@@ -57,6 +69,8 @@ enum NotificationType {
   gig_paused
   gig_cancelled
   low_balance_warning
+
+  @@map("notification_type")
 }
 
 enum PayoutStatus {
@@ -65,6 +79,8 @@ enum PayoutStatus {
   paid
   failed
   cancelled
+
+  @@map("payout_status")
 }
 
 model User {

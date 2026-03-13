@@ -3,18 +3,12 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 
 function createPrismaClient() {
-  const connectionString = process.env.DATABASE_URL!;
-  // Parse the URL to extract individual components, avoiding URL-encoding issues
-  // with special characters in passwords when pg parses the full string.
-  const url = new URL(connectionString);
   const pool = new Pool({
-    host: url.hostname,
-    port: parseInt(url.port) || 5432,
-    database: url.pathname.replace(/^\//, ""),
-    user: url.username,
-    // Use raw password from env var to bypass URL-encoding edge cases
-    password: process.env.DB_PASSWORD ?? decodeURIComponent(url.password),
+    connectionString: process.env.DATABASE_URL,
     ssl: { rejectUnauthorized: false },
+    max: 1,
+    idleTimeoutMillis: 20000,
+    connectionTimeoutMillis: 10000,
   });
   const adapter = new PrismaPg(pool);
   return new PrismaClient({ adapter } as ConstructorParameters<typeof PrismaClient>[0]);
