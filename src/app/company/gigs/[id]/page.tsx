@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import PublishButton from "./PublishButton";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -51,16 +52,8 @@ export default async function CompanyGigDetailPage({ params }: Props) {
             <h1 className="font-semibold text-gray-900">{gig.title}</h1>
           </div>
           <div className="flex items-center gap-3">
-            {gig.status === "draft" && (
-              <form action={`/api/gigs/${id}/publish`} method="POST">
-                <button
-                  type="submit"
-                  className="rounded-lg bg-green-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-green-700"
-                >
-                  Publish Gig
-                </button>
-              </form>
-            )}
+            <Link href="/company/dashboard" className="text-sm text-gray-600 hover:text-gray-900">Dashboard</Link>
+            {gig.status === "draft" && <PublishButton gigId={id} />}
             <Link
               href={`/company/gigs/${id}/applications`}
               className="rounded-lg border px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-50"

@@ -1,8 +1,15 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import AddFundsButton from "./AddFundsButton";
+import DepositSuccess from "./DepositSuccess";
 
-export default async function BillingPage() {
+interface Props {
+  searchParams: Promise<{ insufficient?: string; required?: string; available?: string; deposit?: string }>;
+}
+
+export default async function BillingPage({ searchParams }: Props) {
+  const { insufficient, required, available, deposit } = await searchParams;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
@@ -28,25 +35,41 @@ export default async function BillingPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="border-b bg-white px-6 py-4">
-        <div className="mx-auto flex max-w-6xl items-center gap-4">
-          <Link href="/company/dashboard" className="text-gray-500 hover:text-gray-900">← Dashboard</Link>
-          <h1 className="font-semibold text-gray-900">Billing</h1>
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <Link href="/company/dashboard" className="text-gray-500 hover:text-gray-900">← Dashboard</Link>
+            <h1 className="font-semibold text-gray-900">Billing</h1>
+          </div>
+          <Link href="/company/dashboard" className="text-sm text-gray-600 hover:text-gray-900">Dashboard</Link>
         </div>
       </nav>
 
       <main className="mx-auto max-w-6xl px-6 py-8 space-y-6">
+        {/* Deposit success */}
+        {deposit === "success" && <DepositSuccess />}
+
+        {/* Insufficient funds error */}
+        {insufficient && (
+          <div className="rounded-xl border border-red-200 bg-red-50 p-5">
+            <h2 className="text-lg font-semibold text-red-700">Insufficient funds to publish gig!</h2>
+            <p className="mt-1 text-sm text-red-600">
+              Current balance:{" "}
+              <span className="font-medium">${((parseInt(available ?? "0")) / 100).toFixed(2)}</span>
+              {" · "}
+              Required balance:{" "}
+              <span className="font-medium">${((parseInt(required ?? "0")) / 100).toFixed(2)}</span>
+            </p>
+            <p className="mt-2 text-sm text-red-500">
+              Add funds below to cover the escrow amount, then return to your gig to publish.
+            </p>
+          </div>
+        )}
+
         {/* Balance */}
         <div className="rounded-xl border bg-white p-6">
           <p className="text-sm text-gray-500">Account Balance</p>
           <p className="mt-1 text-4xl font-semibold text-gray-900">${balanceDollars}</p>
-          <form action="/api/stripe/checkout" method="POST" className="mt-4">
-            <button
-              type="submit"
-              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-            >
-              Add Funds
-            </button>
-          </form>
+          <AddFundsButton />
         </div>
 
         {/* Transaction history */}
@@ -73,7 +96,7 @@ export default async function BillingPage() {
                     className={`font-medium ${
                       entry.type === "deposit" || entry.type === "refund"
                         ? "text-green-600"
-                        : "text-gray-900"
+                        : "text-red-600"
                     }`}
                   >
                     {entry.type === "deposit" || entry.type === "refund" ? "+" : "-"}

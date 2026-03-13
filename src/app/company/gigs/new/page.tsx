@@ -134,9 +134,12 @@ export default function NewGigPage() {
             <Link href="/company/gigs" className="text-gray-500 hover:text-gray-900">← Gigs</Link>
             <h1 className="font-semibold text-gray-900">Create New Gig</h1>
           </div>
-          <Link href="/company/support" className="text-sm font-medium text-blue-600 hover:text-blue-700">
-            Need help?
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link href="/company/dashboard" className="text-sm text-gray-600 hover:text-gray-900">Dashboard</Link>
+            <Link href="/company/support" className="text-sm font-medium text-blue-600 hover:text-blue-700">
+              Need help?
+            </Link>
+          </div>
         </div>
       </nav>
 

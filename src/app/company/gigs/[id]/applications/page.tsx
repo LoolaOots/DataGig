@@ -60,9 +60,12 @@ export default function GigApplicationsPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="border-b bg-white px-6 py-4">
-        <div className="mx-auto flex max-w-4xl items-center gap-4">
-          <Link href={`/company/gigs/${gigId}`} className="text-gray-500 hover:text-gray-900">← Gig</Link>
-          <h1 className="font-semibold text-gray-900">Applications</h1>
+        <div className="mx-auto flex max-w-4xl items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <Link href={`/company/gigs/${gigId}`} className="text-gray-500 hover:text-gray-900">← Gig</Link>
+            <h1 className="font-semibold text-gray-900">Applications</h1>
+          </div>
+          <Link href="/company/dashboard" className="text-sm text-gray-600 hover:text-gray-900">Dashboard</Link>
         </div>
       </nav>
 
