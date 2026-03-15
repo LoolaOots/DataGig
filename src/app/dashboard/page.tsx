@@ -16,7 +16,7 @@ export default async function DashboardPage() {
 
   const { data: applications } = await supabase
     .from("applications")
-    .select("id, status, gigs(title)")
+    .select("id, status, gigs(id, title)")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false })
     .limit(5);
@@ -79,9 +79,16 @@ export default async function DashboardPage() {
               {applications.map((app) => (
                 <li key={app.id} className="flex items-center justify-between px-6 py-4">
                   <div>
-                    <p className="font-medium text-gray-900">
-                      {(app.gigs as unknown as { title: string } | null)?.title ?? "Gig"}
-                    </p>
+                    {(() => {
+                      const gig = app.gigs as unknown as { id: string; title: string } | null;
+                      return gig ? (
+                        <Link href={`/gigs/${gig.id}`} className="font-medium text-gray-900 hover:text-blue-600">
+                          {gig.title}
+                        </Link>
+                      ) : (
+                        <p className="font-medium text-gray-900">Gig</p>
+                      );
+                    })()}
                   </div>
                   <span
                     className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
