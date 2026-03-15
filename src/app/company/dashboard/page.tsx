@@ -44,21 +44,21 @@ export default async function CompanyDashboardPage() {
 
         {/* Stats */}
         <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <div className="rounded-xl border bg-white p-6">
+          <Link href="/company/billing" className="rounded-xl border bg-white p-6 hover:border-blue-300 hover:shadow-sm transition">
             <p className="text-sm text-gray-500">Account Balance</p>
             <p className="mt-1 text-3xl font-semibold text-gray-900">${balanceDollars}</p>
-            <Link href="/company/billing" className="mt-2 block text-sm text-blue-600 hover:underline">
-              Add funds
-            </Link>
-          </div>
-          <div className="rounded-xl border bg-white p-6">
+            <p className="mt-2 text-sm text-blue-600">Manage billing →</p>
+          </Link>
+          <Link href="/company/gigs?filter=active" className="rounded-xl border bg-white p-6 hover:border-blue-300 hover:shadow-sm transition">
             <p className="text-sm text-gray-500">Active Gigs</p>
             <p className="mt-1 text-3xl font-semibold text-gray-900">{activeGigs}</p>
-          </div>
-          <div className="rounded-xl border bg-white p-6">
+            <p className="mt-2 text-sm text-blue-600">View active gigs →</p>
+          </Link>
+          <Link href="/company/gigs" className="rounded-xl border bg-white p-6 hover:border-blue-300 hover:shadow-sm transition">
             <p className="text-sm text-gray-500">Total Gigs</p>
             <p className="mt-1 text-3xl font-semibold text-gray-900">{totalGigs}</p>
-          </div>
+            <p className="mt-2 text-sm text-blue-600">View all gigs →</p>
+          </Link>
         </div>
 
         {/* Recent gigs */}
