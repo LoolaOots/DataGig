@@ -38,7 +38,7 @@ export const onApplicationAccepted = inngest.createFunction(
 
     // Email
     await resend.emails.send({
-      from: "DataGigs <noreply@datagigs.com>",
+      from: "DataGigs <onboarding@resend.dev>",
       to: app.user.email,
       subject: `You're in! Assignment code for "${app.gig.title}"`,
       html: `
@@ -79,7 +79,7 @@ export const onApplicationDenied = inngest.createFunction(
     });
 
     await resend.emails.send({
-      from: "DataGigs <noreply@datagigs.com>",
+      from: "DataGigs <onboarding@resend.dev>",
       to: app.user.email,
       subject: `Application update for "${app.gig.title}"`,
       html: `
@@ -293,7 +293,7 @@ export const onPayoutCompleted = inngest.createFunction(
     });
 
     await resend.emails.send({
-      from: "DataGigs <noreply@datagigs.com>",
+      from: "DataGigs <onboarding@resend.dev>",
       to: payoutRequest.user.email,
       subject: "Your payout is on the way",
       html: `
