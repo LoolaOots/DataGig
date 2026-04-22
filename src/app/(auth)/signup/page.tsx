@@ -4,13 +4,9 @@ import { useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
-type Role = "user" | "company";
-
 export default function SignupPage() {
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState<Role>("user");
   const [companyName, setCompanyName] = useState("");
-  const [displayName, setDisplayName] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -21,16 +17,11 @@ export default function SignupPage() {
     setError(null);
 
     const supabase = createClient();
-    const metadata =
-      role === "company"
-        ? { role, company_name: companyName }
-        : { role, display_name: displayName };
-
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
         emailRedirectTo: `${window.location.origin}/auth/callback`,
-        data: metadata,
+        data: { role: "company", company_name: companyName },
       },
     });
 
@@ -60,63 +51,24 @@ export default function SignupPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50">
       <div className="w-full max-w-md rounded-xl bg-white p-8 shadow-sm">
-        <h1 className="mb-1 text-2xl font-semibold text-gray-900">Create your account</h1>
-        <p className="mb-6 text-sm text-gray-500">Join DataGigs as a data collector or a company.</p>
+        <h1 className="mb-1 text-2xl font-semibold text-gray-900">Create your company account</h1>
+        <p className="mb-6 text-sm text-gray-500">Post gigs and source sensor data at scale.</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Role selector */}
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">I am a...</label>
-            <div className="grid grid-cols-2 gap-3">
-              {(["user", "company"] as Role[]).map((r) => (
-                <button
-                  key={r}
-                  type="button"
-                  onClick={() => setRole(r)}
-                  className={`rounded-lg border px-4 py-3 text-sm font-medium transition ${
-                    role === r
-                      ? "border-blue-600 bg-blue-50 text-blue-700"
-                      : "border-gray-200 text-gray-600 hover:border-gray-300"
-                  }`}
-                >
-                  {r === "user" ? "Data Collector" : "Company"}
-                </button>
-              ))}
-            </div>
+            <label htmlFor="company_name" className="mb-1 block text-sm font-medium text-gray-700">
+              Company name
+            </label>
+            <input
+              id="company_name"
+              type="text"
+              required
+              value={companyName}
+              onChange={(e) => setCompanyName(e.target.value)}
+              placeholder="Acme Corp"
+              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            />
           </div>
-
-          {/* Conditional name field */}
-          {role === "company" ? (
-            <div>
-              <label htmlFor="company_name" className="mb-1 block text-sm font-medium text-gray-700">
-                Company name
-              </label>
-              <input
-                id="company_name"
-                type="text"
-                required
-                value={companyName}
-                onChange={(e) => setCompanyName(e.target.value)}
-                placeholder="Acme Corp"
-                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-              />
-            </div>
-          ) : (
-            <div>
-              <label htmlFor="display_name" className="mb-1 block text-sm font-medium text-gray-700">
-                Display name
-              </label>
-              <input
-                id="display_name"
-                type="text"
-                required
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                placeholder="Jane Smith"
-                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-              />
-            </div>
-          )}
 
           <div>
             <label htmlFor="email" className="mb-1 block text-sm font-medium text-gray-700">

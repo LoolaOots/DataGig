@@ -93,6 +93,7 @@ model User {
   userProfile    UserProfile?
   companyProfile CompanyProfile?
   applications   Application[]
+  submissions    Submission[]
   ledgerEntries  LedgerEntry[]   @relation("UserLedger")
   payoutRequests PayoutRequest[]
   notifications  Notification[]
@@ -157,6 +158,7 @@ model Gig {
   labels             GigLabel[]
   deviceRequirements GigDeviceRequirement[]
   applications       Application[]
+  submissions        Submission[]
   escrowHold         GigEscrowHold?
 
   @@map("gigs")
@@ -217,7 +219,9 @@ model Application {
 model Submission {
   id                 String           @id @default(uuid()) @db.Uuid
   applicationId      String           @db.Uuid @map("application_id")
+  gigId              String           @db.Uuid @map("gig_id")
   gigLabelId         String           @db.Uuid @map("gig_label_id")
+  userId             String           @db.Uuid @map("user_id")
   assignmentCode     String           @map("assignment_code")
   status             SubmissionStatus @default(pending_review)
   storagePath        String?          @map("storage_path")
@@ -232,7 +236,9 @@ model Submission {
   updatedAt          DateTime         @updatedAt @map("updated_at")
 
   application   Application   @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  gig           Gig           @relation(fields: [gigId], references: [id], onDelete: Cascade)
   gigLabel      GigLabel      @relation(fields: [gigLabelId], references: [id], onDelete: Cascade)
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   ledgerEntries LedgerEntry[]
 
   @@map("submissions")

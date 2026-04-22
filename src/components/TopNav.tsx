@@ -89,7 +89,7 @@ export default async function TopNav({ links = [], hideDashboard = false }: Prop
                 href="/signup"
                 className="rounded-lg bg-blue-600 px-3 py-1.5 text-white hover:bg-blue-700"
               >
-                Get started
+                Post a gig
               </Link>
             </>
           )}

@@ -56,6 +56,13 @@ export async function updateSession(request: NextRequest) {
 
     const role = userRow?.role ?? "user";
 
+    // Block user-role accounts — website is company-only
+    if (role === "user") {
+      const url = request.nextUrl.clone();
+      url.pathname = "/";
+      return NextResponse.redirect(url);
+    }
+
     // Redirect wrong-role users
     if (pathname.startsWith("/dashboard") && role !== "user" && role !== "admin") {
       const url = request.nextUrl.clone();

@@ -28,41 +28,33 @@ export default async function LandingPage() {
           Now in beta
         </div>
         <h1 className="mb-6 text-5xl font-semibold tracking-tight text-gray-900 leading-tight">
-          Earn money collecting<br />sensor data with your phone
+          Source real-world sensor data<br />at scale
         </h1>
         <p className="mb-8 mx-auto max-w-2xl text-xl text-gray-500 leading-relaxed">
-          Companies need real-world motion and sensor data. You have a phone.
-          DataGigs connects the two — you do the activity, earn credits, and get paid.
+          Post a gig with your activity requirements, escrow funds, and let our
+          verified collectors do the work. Pay only for accepted, verified submissions.
         </p>
         <div className="flex items-center justify-center gap-4">
           {user ? (
-            <>
-              <Link
-                href={dashboardHref}
-                className="rounded-xl bg-blue-600 px-6 py-3 text-base font-medium text-white hover:bg-blue-700"
-              >
-                Go to dashboard →
-              </Link>
-              <Link
-                href="/gigs"
-                className="rounded-xl border border-gray-200 px-6 py-3 text-base font-medium text-gray-700 hover:bg-gray-50"
-              >
-                Browse gigs
-              </Link>
-            </>
+            <Link
+              href={dashboardHref}
+              className="rounded-xl bg-blue-600 px-6 py-3 text-base font-medium text-white hover:bg-blue-700"
+            >
+              Go to dashboard →
+            </Link>
           ) : (
             <>
               <Link
                 href="/signup"
                 className="rounded-xl bg-blue-600 px-6 py-3 text-base font-medium text-white hover:bg-blue-700"
               >
-                Start collecting →
+                Post your first gig →
               </Link>
               <Link
-                href="/signup?role=company"
+                href="/login"
                 className="rounded-xl border border-gray-200 px-6 py-3 text-base font-medium text-gray-700 hover:bg-gray-50"
               >
-                Post a gig
+                Sign in
               </Link>
             </>
           )}
@@ -77,18 +69,18 @@ export default async function LandingPage() {
             {[
               {
                 step: "1",
-                title: "Browse gigs",
-                desc: "Companies post data collection campaigns — walking, running, cycling, and more.",
+                title: "Post a gig",
+                desc: "Define your activity type, recording duration, and accepted device requirements.",
               },
               {
                 step: "2",
-                title: "Apply & get accepted",
-                desc: "Apply with your device info. Accepted collectors receive a unique assignment code.",
+                title: "Review applicants",
+                desc: "Accept collectors with the right devices. Each receives a unique assignment code.",
               },
               {
                 step: "3",
-                title: "Collect data & earn",
-                desc: "Use the DataGigs app to record and submit. Accepted submissions credit your balance instantly.",
+                title: "Get verified data",
+                desc: "Submissions are verified automatically. Pay only for what passes — funds are held in escrow.",
               },
             ].map((item) => (
               <div key={item.step} className="rounded-2xl bg-white p-6 shadow-sm">
@@ -130,7 +122,7 @@ export default async function LandingPage() {
                 ))}
               </ul>
               <Link
-                href={user && role === "company" ? "/company/gigs/new" : "/signup?role=company"}
+                href={user && role === "company" ? "/company/gigs/new" : "/signup"}
                 className="mt-6 inline-block rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700"
               >
                 {user && role === "company" ? "Post a new gig" : "Post your first gig"}
