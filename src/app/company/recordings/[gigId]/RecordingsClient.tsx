@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { formatRelativeTime } from "@/lib/formatRelativeTime";
 
 interface Submission {
@@ -12,7 +12,6 @@ interface Submission {
 }
 
 interface Props {
-  gigId: string;
   submissions: Submission[];
 }
 
@@ -35,33 +34,51 @@ export default function RecordingsClient({ submissions }: Props) {
   const [isZipping, setIsZipping] = useState(false);
 
   // Derive labels (non-null only, sorted alphabetically)
-  const labels = Array.from(
-    new Set(
-      submissions
-        .filter((s) => s.labelName !== null)
-        .map((s) => s.labelName as string)
-    )
-  ).sort();
+  const labels = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          submissions
+            .filter((s) => s.labelName !== null)
+            .map((s) => s.labelName as string)
+        )
+      ).sort(),
+    [submissions]
+  );
 
   // Label counts (total for all, not just visible)
-  const labelCounts = Object.fromEntries(
-    labels.map((label) => [
-      label,
-      submissions.filter((s) => s.labelName === label).length,
-    ])
+  const labelCounts = useMemo(
+    () =>
+      Object.fromEntries(
+        labels.map((label) => [
+          label,
+          submissions.filter((s) => s.labelName === label).length,
+        ])
+      ),
+    [submissions, labels]
   );
 
   // Visible submissions based on active tab
-  const visible =
-    activeTab === "all"
-      ? submissions
-      : submissions.filter((s) => s.labelName === activeTab);
+  const visible = useMemo(
+    () =>
+      activeTab === "all"
+        ? submissions
+        : submissions.filter((s) => s.labelName === activeTab),
+    [submissions, activeTab]
+  );
 
   // Selection state relative to visible list
   const allVisibleSelected =
     visible.length > 0 && visible.every((s) => selectedIds.has(s.id));
   const someVisibleSelected =
     visible.some((s) => selectedIds.has(s.id)) && !allVisibleSelected;
+
+  const selectAllRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (selectAllRef.current) {
+      selectAllRef.current.indeterminate = someVisibleSelected;
+    }
+  }, [someVisibleSelected]);
 
   // Total selected across all tabs
   const totalSelected = selectedIds.size;
@@ -189,9 +206,7 @@ export default function RecordingsClient({ submissions }: Props) {
             type="checkbox"
             className="h-4 w-4 rounded border-gray-300 text-blue-600"
             checked={allVisibleSelected}
-            ref={(el) => {
-              if (el) el.indeterminate = someVisibleSelected;
-            }}
+            ref={selectAllRef}
             onChange={toggleSelectAll}
           />
           <span className="text-sm text-gray-500">Select all ({visible.length})</span>

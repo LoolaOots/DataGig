@@ -67,7 +67,7 @@ export default async function GigRecordingsPage({ params }: Props) {
         </div>
       </nav>
 
-      <RecordingsClient gigId={gigId} submissions={submissions} />
+      <RecordingsClient submissions={submissions} />
     </div>
   );
 }
