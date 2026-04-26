@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { prisma } from "@/lib/prisma";
 import TopNav from "@/components/TopNav";
 
 export default async function CompanyDashboardPage() {
@@ -25,14 +26,23 @@ export default async function CompanyDashboardPage() {
     ? (profile.balance_cents / 100).toFixed(2)
     : "0.00";
 
-  const activeGigs = gigs?.filter((g) => g.status === "open").length ?? 0;
   const totalGigs = gigs?.length ?? 0;
+
+  const totalRecordings = await prisma.submission.count({
+    where: {
+      status: "accepted",
+      storagePath: { not: null },
+      application: {
+        gig: { companyId: user.id },
+      },
+    },
+  });
 
   return (
     <div className="min-h-screen bg-gray-50">
       <TopNav hideDashboard links={[
         { href: "/company/gigs", label: "Gigs" },
-        { href: "/company/billing", label: "Billing" },
+        { href: "/company/data", label: "Data" },
         { href: "/company/gigs/new", label: "New Gig" },
       ]} />
 
@@ -49,15 +59,15 @@ export default async function CompanyDashboardPage() {
             <p className="mt-1 text-3xl font-semibold text-gray-900">${balanceDollars}</p>
             <p className="mt-2 text-sm text-blue-600">Manage billing →</p>
           </Link>
-          <Link href="/company/gigs?filter=active" className="rounded-xl border bg-white p-6 hover:border-blue-300 hover:shadow-sm transition">
-            <p className="text-sm text-gray-500">Active Gigs</p>
-            <p className="mt-1 text-3xl font-semibold text-gray-900">{activeGigs}</p>
-            <p className="mt-2 text-sm text-blue-600">View active gigs →</p>
-          </Link>
           <Link href="/company/gigs" className="rounded-xl border bg-white p-6 hover:border-blue-300 hover:shadow-sm transition">
-            <p className="text-sm text-gray-500">Total Gigs</p>
+            <p className="text-sm text-gray-500">Gigs</p>
             <p className="mt-1 text-3xl font-semibold text-gray-900">{totalGigs}</p>
             <p className="mt-2 text-sm text-blue-600">View all gigs →</p>
+          </Link>
+          <Link href="/company/data" className="rounded-xl border bg-white p-6 hover:border-blue-300 hover:shadow-sm transition">
+            <p className="text-sm text-gray-500">Collected Data</p>
+            <p className="mt-1 text-3xl font-semibold text-gray-900">{totalRecordings}</p>
+            <p className="mt-2 text-sm text-blue-600">View Data Collected →</p>
           </Link>
         </div>
 

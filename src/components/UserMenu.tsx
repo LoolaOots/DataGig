@@ -71,6 +71,18 @@ export default function UserMenu({ displayName, email, dashboardHref, role = "us
               </svg>
               Dashboard
             </Link>
+            {role === "company" && (
+              <Link
+                href="/company/billing"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              >
+                <svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg>
+                Billing
+              </Link>
+            )}
             <Link
               href="/settings"
               onClick={() => setOpen(false)}
