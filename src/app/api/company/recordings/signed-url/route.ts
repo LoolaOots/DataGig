@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
@@ -59,7 +60,8 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const { data, error } = await supabase.storage
+    const adminClient = createAdminClient();
+    const { data, error } = await adminClient.storage
       .from("sensor-data")
       .createSignedUrl(submission.storagePath, 60);
 

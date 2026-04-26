@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { zipSync } from "fflate";
@@ -130,16 +131,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  // Download all files from storage concurrently
-  const downloadResults = await Promise.all(
+  // Generate signed URLs for all files concurrently (60s is enough for zip building)
+  const adminClient = createAdminClient();
+  const signedUrlResults = await Promise.all(
     submissions.map((submission) =>
-      supabase.storage.from("sensor-data").download(submission.storagePath!)
+      adminClient.storage.from("sensor-data").createSignedUrl(submission.storagePath!, 60)
     )
   );
 
-  // Fail fast if any download returned an error or null data
-  for (const { data, error } of downloadResults) {
-    if (error || !data) {
+  for (const { error } of signedUrlResults) {
+    if (error) {
       return NextResponse.json(
         { error: "Download failed — please try again" },
         { status: 500 }
@@ -147,21 +148,41 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // Convert blobs to Uint8Arrays and build the files map with deduplication
+  // Fetch file bytes via signed URLs concurrently (bypasses storage RLS)
+  let fetchResults: Response[];
+  try {
+    fetchResults = await Promise.all(
+      signedUrlResults.map(({ data }) => fetch(data!.signedUrl))
+    );
+  } catch {
+    return NextResponse.json(
+      { error: "Download failed — please try again" },
+      { status: 500 }
+    );
+  }
+
+  for (const res of fetchResults) {
+    if (!res.ok) {
+      return NextResponse.json(
+        { error: "Download failed — please try again" },
+        { status: 500 }
+      );
+    }
+  }
+
+  // Convert responses to Uint8Arrays and build the files map with deduplication
   const files: Record<string, Uint8Array> = {};
   const filenameCounts: Record<string, number> = {};
 
   for (let i = 0; i < submissions.length; i++) {
     const submission = submissions[i];
-    const blob = downloadResults[i].data as Blob;
 
-    // Fix #3: use a null guard instead of an unsafe cast
     const storagePath = submission.storagePath;
     if (!storagePath) continue; // defensive; Prisma filter should prevent this
 
     let arrayBuffer: ArrayBuffer;
     try {
-      arrayBuffer = await blob.arrayBuffer();
+      arrayBuffer = await fetchResults[i].arrayBuffer();
     } catch {
       return NextResponse.json(
         { error: "Download failed — please try again" },
