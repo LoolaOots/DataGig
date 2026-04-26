@@ -71,7 +71,7 @@ export default async function CompanyRecordingsPage() {
             <Link href="/company/dashboard" className="text-gray-500 hover:text-gray-900">
               ← Dashboard
             </Link>
-            <h1 className="font-semibold text-gray-900">Recordings</h1>
+            <h1 className="font-semibold text-gray-900">Data</h1>
           </div>
           <Link href="/company/dashboard" className="text-sm text-gray-600 hover:text-gray-900">
             Dashboard
@@ -89,7 +89,7 @@ export default async function CompanyRecordingsPage() {
             {gigsWithCounts.map((gig) => (
               <Link
                 key={gig.id}
-                href={`/company/recordings/${gig.id}`}
+                href={`/company/data/${gig.id}`}
                 className="flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition"
               >
                 <div>

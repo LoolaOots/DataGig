@@ -9,6 +9,8 @@ interface Submission {
   durationSeconds: number | null;
   submittedAt: string;
   labelName: string | null;
+  submitterName: string | null;
+  submitterEmail: string;
 }
 
 interface Props {
@@ -272,6 +274,9 @@ export default function RecordingsClient({ submissions }: Props) {
                   {filename(s.storagePath)}
                 </p>
                 <p className="text-xs text-gray-500">{s.labelName ?? "—"}</p>
+                <p className="truncate text-xs text-gray-400">
+                  {s.submitterName ?? s.submitterEmail}
+                </p>
               </div>
               <span className="text-sm text-gray-700">
                 {formatDuration(s.durationSeconds)}
@@ -282,9 +287,12 @@ export default function RecordingsClient({ submissions }: Props) {
               <div className="flex items-center gap-1.5">
                 <button
                   onClick={() => downloadSingle(s.id)}
-                  className="rounded border border-gray-200 bg-white px-2 py-1 text-xs text-gray-700 hover:bg-gray-50"
+                  title="Download"
+                  className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-blue-600 bg-white text-blue-600 hover:bg-blue-50 transition"
                 >
-                  ↓
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
                 </button>
                 {downloadErrors[s.id] && (
                   <span className="text-xs text-red-500">{downloadErrors[s.id]}</span>

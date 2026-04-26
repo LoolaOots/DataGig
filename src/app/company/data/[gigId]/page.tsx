@@ -39,6 +39,19 @@ export default async function GigRecordingsPage({ params }: Props) {
       gigLabel: {
         select: { labelName: true },
       },
+      application: {
+        select: {
+          gig: { select: { title: true } },
+          user: {
+            select: {
+              email: true,
+              userProfile: {
+                select: { displayName: true },
+              },
+            },
+          },
+        },
+      },
     },
     orderBy: { submittedAt: "desc" },
   });
@@ -49,6 +62,8 @@ export default async function GigRecordingsPage({ params }: Props) {
     durationSeconds: s.durationSeconds,
     submittedAt: s.submittedAt.toISOString(),
     labelName: s.gigLabel?.labelName ?? null,
+    submitterName: s.application.user.userProfile?.displayName ?? null,
+    submitterEmail: s.application.user.email,
   }));
 
   return (
@@ -56,10 +71,10 @@ export default async function GigRecordingsPage({ params }: Props) {
       <nav className="border-b bg-white px-6 py-4">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <Link href="/company/recordings" className="text-gray-500 hover:text-gray-900">
-              ← Recordings
+            <Link href="/company/data" className="text-gray-500 hover:text-gray-900">
+              ← Data
             </Link>
-            <h1 className="font-semibold text-gray-900">{gig.title}</h1>
+            <h1 className="font-semibold text-gray-900">Data Collected for {gig.title}</h1>
           </div>
           <Link href="/company/dashboard" className="text-sm text-gray-600 hover:text-gray-900">
             Dashboard
